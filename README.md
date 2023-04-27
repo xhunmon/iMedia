@@ -2,9 +2,9 @@ English | [简体中文](README_ZH.md)
 
 According to the OpenAI API to achieve a simple and practical intelligent media interface tool with ChatGPT 3.5/4 chat, generate images, etc., can save the output records to help you work and play, Win, Mac platform out of the box.
 
-```HTML
-<video src="doc/look.mp4" controls="controls" width="849" height="592"></video>
-```
+
+https://user-images.githubusercontent.com/26396755/234748470-6203534e-9845-4a3b-a512-09c315670175.mp4
+
 
 
 # Use

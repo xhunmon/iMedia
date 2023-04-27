@@ -2,9 +2,9 @@
 
 根据OpenAI官方API实现一个简单实用的智能媒体界面工具，有ChatGPT 3.5/4聊天，生成图片等，可保存输出的记录，帮助你工作和娱乐，Win、Mac平台开箱即用。
 
-```HTML
-<video src="doc/look.mp4" controls="controls" width="849" height="592"></video>
-```
+
+https://user-images.githubusercontent.com/26396755/234748470-6203534e-9845-4a3b-a512-09c315670175.mp4
+
 
 
 # 安装
