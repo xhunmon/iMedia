@@ -20,6 +20,7 @@ class Gpt(object):
     def __init__(self, config: Config):
         self.session = []
         self.api_prompt = []
+        self.cfg = config
         self.update_config(config)
         self.content = ""
         self.size = ""
@@ -87,6 +88,7 @@ class GptImg(Gpt):
             for url in urls:
                 image_response = requests.get(url)
                 # image = Image.open(BytesIO(image_response.content))
+                # images[0].show()
                 image = base64.b64encode(image_response.content).decode('utf-8')
                 images.append(image)
             Gpt.callback_status(images, state=4)
@@ -94,7 +96,6 @@ class GptImg(Gpt):
             Gpt.callback_status("Exception:{}".format(e), state=5)
         Gpt.callback_status(state=3)
         self.is_finish = True
-        # images[0].show()
 
 
 class GptTxt(Gpt):
@@ -102,7 +103,7 @@ class GptTxt(Gpt):
     def __init__(self, config: Config):
         super().__init__(config)
 
-    def query_openai_stream(self, data: dict) -> str:
+    def query_openai_stream(self, data) -> str:
         messages = []
         messages.extend(self.api_prompt)
         messages.extend(data)
@@ -127,7 +128,9 @@ class GptTxt(Gpt):
         except openai.error.OpenAIError as e:
             Gpt.callback_status("OpenAIError:{}".format(e), state=2)
             answer = ""
-        Gpt.callback_status(state=3)
+        except Exception as e:
+            Gpt.callback_status("Error:{}".format(e), state=2)
+            answer = ""
         return answer
 
     def handle_input(self, content: str):
@@ -162,9 +165,10 @@ class GptTxt(Gpt):
                             f.close()
             except Exception as e:
                 Gpt.callback_status("Write error: {} ".format(e), state=2)
+        Gpt.callback_status(state=3)
         self.is_finish = True
 
-    def query_openai(self, data: dict) -> str:
+    def query_openai(self, data) -> str:
         messages = []
         messages.extend(self.api_prompt)
         messages.extend(data)
@@ -179,5 +183,7 @@ class GptTxt(Gpt):
             Gpt.callback_status(content, state=2)
         except openai.error.OpenAIError as e:
             Gpt.callback_status("OpenAI error: {} ".format(e), state=2)
+        except Exception as e:
+            Gpt.callback_status("Error:{}".format(e), state=2)
         Gpt.callback_status(state=3)
         return content

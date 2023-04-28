@@ -2,7 +2,7 @@
 """
 @Author  : Xhunmon 
 @Time    : 2023/4/21 23:03
-@FileName: guiv2.py
+@FileName: main.py
 @desc: 
 """
 import PySimpleGUI as sg
@@ -40,55 +40,58 @@ class MainWin(object):
         """
         self.update_init()
         sg.theme(get_theme())
-
-        left_col = [[sg.B(conf.main(Key.M_RUN)), sg.B(conf.main(Key.M_CLEAR)), sg.B(conf.main(Key.M_COPY))]]
-
-        right_col = [
-            [sg.B(conf.main(Key.M_SETTINGS)), sg.Button(conf.main(Key.M_EXIT))],
-            [sg.T(conf.main('Version') + conf.config('Version'))]
-        ]
-        operation_at_bottom = sg.pin(sg.Column([[sg.T(conf.main('Business'), font='Default 12', pad=(0, 0)),
-                                                 sg.T(conf.main('Email') + conf.config('Email') + '  ',
-                                                      font='Default 12', pad=(0, 0)),
-                                                 sg.T(conf.main('WeChat') + conf.config('Wechat') + '  ',
-                                                      font='Default 12',
-                                                      pad=(0, 0))]],
-                                               pad=(0, 0), k='-OPTIONS BOTTOM-', expand_x=True, expand_y=False),
-                                     expand_x=True, expand_y=False)
-        img_layout = [
+        top_layout = [sg.Text(conf.main('Description'), font='Any 15', size=(60, 1), justification='left'),
+                      sg.Column([[sg.B(conf.main(Key.M_SETTINGS))]], justification='right')]
+        txt_in = [[sg.Multiline(size=(80, 2), autoscroll=True, font=("Andale Mono", 16), write_only=True, expand_x=True,
+                                key='IN_TEXT')]]
+        in_layout = sg.Col([
+            [sg.TabGroup([[sg.Tab('Input', txt_in)]], k='_INGROUP_')], [sg.Text(size=(12, 1), key='-OUT-')],
+        ])
+        img_btns = [
             sg.Combo(['256x256', '512x512', '1024x1024'], default_value='512x512', readonly=True, key='_IMAGE_SIZE_'),
             sg.Combo(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], default_value='1', readonly=True,
                      key='_IMAGE_COUNT_'),
             sg.B(conf.main(Key.M_PRE)), sg.B(conf.main(Key.M_NEXT)), sg.B(conf.main(Key.M_SAVE)),
             sg.B(conf.main(Key.M_SAVE_ALL)),
         ]
-        # ----- Full layout -----
-        layout = [
-            [sg.Text(conf.main('Description'), font='Any 15', pad=(0, 5))],
-            [sg.Multiline(size=(80, 2), font=("Andale Mono", 16), write_only=True, expand_x=True, expand_y=False,
-                          key='IN_TEXT',
-                          reroute_stdout=True, echo_stdout_stderr=True, reroute_cprint=True)],
+        btn_layout = sg.Col([
             [sg.Image(data=conf.config('Loading').encode('utf-8'), key='_IMAGE_'),
-             sg.Column([img_layout], pad=(50, 1), expand_x=True, expand_y=False, k='_IMG_LAYOUT_',
-                       visible=self.is_img)],
-            # [sg.Multiline(size=(80, 22), font=('Helvetica', 12), write_only=True, expand_x=True, expand_y=True,
-            #               key='OUT_TEXT',
-            #               reroute_stdout=True, echo_stdout_stderr=True, reroute_cprint=True)],
-            [sg.Image(data=None, key='OUT_IMAGE', expand_x=True, expand_y=True, visible=self.is_img)],
-            [sg.Multiline(size=(80, 22), font=('Helvetica', 12), write_only=True, expand_x=True, expand_y=True,
-                          key='OUT_TEXT', reroute_stdout=True, echo_stdout_stderr=True, reroute_cprint=True,
-                          visible=not self.is_img)],
-            [sg.Pane(
-                [sg.Column(left_col, element_justification='l', expand_x=True, expand_y=False),
-                 sg.Column(right_col, element_justification='c', expand_x=True, expand_y=False)], orientation='h',
-                relief=sg.RELIEF_SUNKEN, expand_x=True, expand_y=False, k='-PANE-')],
-            [operation_at_bottom, sg.Sizegrip()]]
+             sg.Column([[sg.B(conf.main(Key.M_RUN)), sg.B(conf.main(Key.M_CLEAR)), sg.B(conf.main(Key.M_COPY))]]),
+             sg.Column([img_btns], pad=(50, 1), k='_IMG_LAYOUT_', expand_x=True, expand_y=False, visible=self.is_img)]
+        ], expand_x=True, expand_y=False)
+        img_out = [[sg.Image(key='OUT_IMAGE')]]
+        txt_out = [[sg.Multiline(size=(80, 30), font='Courier 12', k='OUT_TEXT', reroute_stdout=True,
+                                 echo_stdout_stderr=True, reroute_cprint=True)]]
+        bottom_layout = sg.pin(sg.Column([
+            [sg.T(conf.main('Business'), font='Default 12', pad=(0, 0)),
+             sg.T(conf.main('Email') + conf.config('Email') + '  ', font='Default 12', pad=(0, 0)),
+             sg.T(conf.main('WeChat') + conf.config('Wechat') + '  ', font='Default 12', pad=(0, 0)),
+             sg.T(conf.main('Version') + conf.config('Version'))]
+        ], pad=(0, 0), k='-OPTIONS BOTTOM-', expand_x=True, expand_y=False), expand_x=True, expand_y=False)
 
+        out_layout = sg.Col([
+            [sg.TabGroup(
+                [[sg.Tab('Output Text', txt_out, key='_TABTEXT_'), sg.Tab('Output Image', img_out, key='_TABIMAGE_')]],
+                k='_OUTGROUP_')],
+            [sg.Text(size=(12, 1), key='-OUT-')],
+        ])
+        # ----- Full layout ----- sg.Button(conf.main(Key.M_EXIT))
+        layout = [
+            [top_layout],
+            [sg.Pane([in_layout, btn_layout, out_layout], handle_size=5, orientation='v', border_width=0,
+                     relief=sg.RELIEF_GROOVE, expand_x=True, expand_y=True, k='_PANE_')],
+            [bottom_layout, sg.Sizegrip()]]
         # --------------------------------- Create Window ---------------------------------
         window = sg.Window(conf.main('Title'), layout, finalize=True, resizable=True, use_default_focus=False)
         self.g_window = window
-        window.set_min_size(window.size)
-
+        # window.set_min_size(window.size)
+        self.g_window['_TABIMAGE_' if self.is_img else '_TABTEXT_'].select()
+        window['_INGROUP_'].expand(True, True, True)
+        window['_OUTGROUP_'].expand(True, True, True)
+        window['IN_TEXT'].expand(True, True, True)
+        window['OUT_IMAGE'].expand(True, True, True)
+        window['OUT_TEXT'].expand(True, True, True)
+        window['_PANE_'].expand(True, True, True)
         window.bind('<F1>', 'Exit')
         # window.bind("<Enter>", 'Enter')
         window['IN_TEXT'].bind('<Return>', ' Return')
@@ -110,8 +113,9 @@ class MainWin(object):
             self.gpt = GptImg(self.cfg) if self.is_img else GptTxt(self.cfg)
         if self.g_window:
             self.g_window['_IMG_LAYOUT_'].update(visible=is_img_now)
-            self.g_window['OUT_IMAGE'].update(visible=is_img_now)
-            self.g_window['OUT_TEXT'].update(visible=not is_img_now)
+            self.g_window['_TABIMAGE_' if is_img_now else '_TABTEXT_'].select()
+            # self.g_window['OUT_IMAGE'].update(visible=is_img_now)
+            # self.g_window['OUT_TEXT'].update(visible=not is_img_now)
 
     def update_config(self):
         self.cfg.api_key = get_cache(Key.API_KEY, '')
@@ -129,7 +133,8 @@ class MainWin(object):
 
     def callback_status(self, content: str = None, state: int = 1):
         """
-        @state: 1 prepare( show loading); 2 request...(loading, get data); 3 finish(done or fail); 4 image=[], 5 image error
+        @state: 1 prepare( show loading); 2 request...(loading, get data);
+                3 finish(done or fail); 4 image=[], 5 image error
         """
         if not self.g_window:
             return
@@ -154,11 +159,6 @@ class MainWin(object):
             self.g_window['IN_TEXT'].update(content, append=True)
 
     def show(self):
-        """
-            The main program that contains the event loop.
-            It will call the make_window function to create the window.
-            """
-        global python_only
         # icon = sg.EMOJI_BASE64_HAPPY_WINK
         icon = conf.config('Logo').encode('utf-8')
         # icon = os.path.join(os.path.dirname(__file__), 'doc', 'doc/logo.png')
