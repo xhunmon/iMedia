@@ -24,8 +24,8 @@ def settings_show():
     layout = [
         [sg.T('  ', font='_ 16', size=(45, 1))],
         [sg.T(conf.settings('Engine'), font='_ 16'),
-         sg.Combo(['Text Chat', 'Image Generate'], default_value=get_cache(Key.TYPE_INPUT, Key.TYPE_DEFAULT),
-                  readonly=True, key=Key.TYPE_INPUT)],
+         sg.Combo([Key.TYPE_CHAT, Key.TYPE_CREATE, Key.TYPE_EDIT],
+                  default_value=get_cache(Key.TYPE_INPUT, Key.TYPE_CHAT), readonly=True, key=Key.TYPE_INPUT)],
         [sg.Input(size=(38, 1), default_text=get_cache(Key.API_KEY, ''), key=Key.API_KEY),
          sg.T('API KEY', font='_ 12')],
         [sg.Combo(['gpt-3.5-turbo', 'gpt-4', 'gpt-4-32k'], default_value=get_cache(Key.MODEL_INPUT, Key.MODEL_DEFAULT),
@@ -83,7 +83,7 @@ def settings_show():
             settings_changed = True
             break
         elif event == conf.settings('Reset'):  # 恢复所有默认设置
-            save_cache(Key.TYPE_INPUT, Key.TYPE_DEFAULT)
+            save_cache(Key.TYPE_INPUT, Key.TYPE_CHAT)
             save_cache(Key.PROXY_ENABLE, False)
             save_cache(Key.PROXY_INPUT, '')
             save_cache(Key.API_KEY, '')

@@ -25,6 +25,8 @@ class Gpt(object):
         self.content = ""
         self.size = ""
         self.num = ""
+        self.edit_file = ''
+        self.mask_file = ''
         self.is_change = False
         self.is_finish = True
         gpt_t = threading.Thread(target=self.start)
@@ -51,12 +53,14 @@ class Gpt(object):
                 self.handle_input(self.content)
             time.sleep(1)
 
-    def content_change(self, content: str, size=None, num=1):
+    def content_change(self, content: str, size=None, num=1, edit_file='', mask_file=''):
         if not content:
             return
         self.content = content
         self.size = size
         self.num = num
+        self.edit_file = edit_file
+        self.mask_file = mask_file
         self.is_change = True
 
     def handle_input(self, content: str):
@@ -64,7 +68,7 @@ class Gpt(object):
         pass
 
 
-class GptImg(Gpt):
+class GptImgCreate(Gpt):
     def __init__(self, config: Config):
         super().__init__(config)
 
@@ -76,6 +80,42 @@ class GptImg(Gpt):
         try:
             Gpt.callback_status(state=1)
             response = openai.Image.create(
+                prompt=content,
+                # response_format="b64_json",
+                n=int(self.num),
+                size=self.size
+            )
+            urls = []
+            for choice in response['data']:
+                urls.append(choice['url'].strip())
+            images = []
+            for url in urls:
+                image_response = requests.get(url)
+                # image = Image.open(BytesIO(image_response.content))
+                # images[0].show()
+                image = base64.b64encode(image_response.content).decode('utf-8')
+                images.append(image)
+            Gpt.callback_status(images, state=4)
+        except Exception as e:
+            Gpt.callback_status("Exception:{}".format(e), state=5)
+        Gpt.callback_status(state=3)
+        self.is_finish = True
+
+
+class GptImgEdit(Gpt):
+    def __init__(self, config: Config):
+        super().__init__(config)
+
+    def handle_input(self, content: str):
+        """impl by son"""
+        if not content:
+            return
+        self.is_finish = False
+        try:
+            Gpt.callback_status(state=1)
+            response = openai.Image.create_edit(
+                image=open(self.edit_file, "rb"),
+                mask=open(self.mask_file, 'rb'),
                 prompt=content,
                 # response_format="b64_json",
                 n=int(self.num),
